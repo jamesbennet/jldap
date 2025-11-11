@@ -1,0 +1,19 @@
+-----------
+TO RELEASE
+-----------
+git tag -a v1.0.0 -m "JLDAP 1.0.0"
+git push --tags
+git clean -dfx
+make clean
+make check
+make RELEASE=1 VERSION=v1.0.0 release
+
+This will create archives under dist/ named like:
+
+  dist/jldap_v1.0.0_<os>_<arch>.tar.gz   # on Linux/macOS
+  dist/jldap_v1.0.0_windows_amd64.zip    # on Windows
+
+------------
+VERSION 0.1
+------------
+* Initial release

@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>jldap – Directory</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="stylesheet" href="/static/ui.css">
+</head>
+<body>
+<div class="page">
+    <div class="page-inner">
+        <header>
+            <div>
+                <span class="product-tag">Directory Control Plane</span>
+                <h1>
+                    <span class="highlight">jldap</span>
+                    <span style="opacity:0.5;">·</span>
+                    <span>Directory</span>
+                </h1>
+            </div>
+            <div class="env-pill">
+                <span class="env-dot"></span>
+                <span>Service online</span>
+            </div>
+        </header>
+
+        <section class="meta-card">
+            <div class="meta-block">
+                <div class="meta-row">
+                    <strong>Base DN:</strong>
+                    <code>{{.BaseDN}}</code>
+                </div>
+                <div class="meta-row">
+                    <strong>Admin group (CN):</strong>
+                    <span>{{.AdminCN}}</span>
+                </div>
+                <div class="meta-row">
+                    <strong>Authenticated as:</strong>
+                    <code>{{.AuthedDN}}</code>
+                </div>
+            </div>
+            <div class="meta-block">
+                <div class="meta-row">
+                    <strong>Config file:</strong>
+                    <code>{{.ConfigPath}}</code>
+                </div>
+                <div class="meta-row">
+                    <strong>Last reload:</strong>
+                    <span>{{.LastReload}}</span>
+                </div>
+                <div class="meta-row">
+                    <strong>Config mtime:</strong>
+                    <span>{{.LastFileMTime}}</span>
+                </div>
+                <div class="timestamp-row">
+                    <span class="timestamp-tag">Rendered at {{.Now}}</span>
+                </div>
+            </div>
+        </section>
+
+        <div class="search-bar">
+            <form method="get" action="/ui">
+                <div class="search-input-wrapper">
+                    <input type="text" name="q" value="{{.Query}}" placeholder="Search users or groups by uid, CN, mail…">
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <span>Search</span>
+                </button>
+            </form>
+        </div>
+
+        <section>
+            <div class="section-header">
+                <h2>
+                    Users
+                    <small><a href="/ui/users/new">[New]</a></small>
+                </h2>
+                <span class="count-pill">Directory users</span>
+            </div>
+
+            <div class="table-card">
+                <div class="table-scroll">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>uid</th>
+                            <th>cn</th>
+                            <th>mail</th>
+                            <th>uidNumber</th>
+                            <th>gidNumber</th>
+                            <th>homeDirectory</th>
+                            <th>loginShell</th>
+                            <th>memberOf</th>
+                            <th>actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {{range .Users}}
+                        {{ $gid := .GIDNumber }}
+                        <tr>
+                            <td class="cell-monospace">{{.UID}}</td>
+                            <td>{{.CN}}</td>
+                            <td class="cell-monospace cell-muted">{{.Mail}}</td>
+                            <td class="cell-monospace">{{.UIDNumber}}</td>
+                            <td class="cell-monospace">
+                                {{with (index $.GIDToCN $gid)}}
+                                <a href="/ui/groups/edit?cn={{.}}">{{$gid}}</a>
+                                {{else}}
+                                {{$gid}}
+                                {{end}}
+                            </td>
+                            <td class="cell-monospace">{{.HomeDir}}</td>
+                            <td class="cell-monospace cell-muted">{{.LoginShell}}</td>
+                            <td class="member-list">
+                                {{with (index $.UserMemberOf .UID)}}
+                                {{range $i, $g := .}}{{if $i}}<br>{{end}}{{$g}}{{end}}
+                                {{else}}
+                                <em>—</em>
+                                {{end}}
+                            </td>
+                            <td class="actions-cell">
+                                <div class="actions-inline">
+                                    <a href="/ui/users/edit?uid={{.UID}}">Edit</a>
+                                    <span style="color:rgba(75,85,99,0.9);">|</span>
+                                    <form method="post" action="/ui/users/delete" onsubmit="return confirm('Delete user {{.UID}}?');">
+                                        <input type="hidden" name="csrf_token" value="{{$.CsrfToken}}">
+                                        <input type="hidden" name="uid" value="{{.UID}}">
+                                        <button type="submit" class="btn-link">Delete</button>
+                                    </form>
+                                </div>
+                                <br>
+                                {{if (index $.IsAdmin .UID)}}
+                                <form method="post" action="/ui/users/remove-admin" style="margin-top:3px;" onsubmit="return confirm('Remove admin from {{.UID}}?');">
+                                    <input type="hidden" name="csrf_token" value="{{$.CsrfToken}}">
+                                    <input type="hidden" name="uid" value="{{.UID}}">
+                                    <button type="submit" class="btn-outline-pill">Remove admin</button>
+                                </form>
+                                <div class="badge-admin">
+                                    <span>◆</span>
+                                    <span>Admin</span>
+                                </div>
+                                {{else}}
+                                <form method="post" action="/ui/users/make-admin" style="margin-top:3px;" onsubmit="return confirm('Make {{.UID}} an admin?');">
+                                    <input type="hidden" name="csrf_token" value="{{$.CsrfToken}}">
+                                    <input type="hidden" name="uid" value="{{.UID}}">
+                                    <button type="submit" class="btn-outline-pill">Make admin</button>
+                                </form>
+                                {{end}}
+                            </td>
+                        </tr>
+                        {{end}}
+                        {{if not .Users}}<tr><td colspan="9"><em>No users</em></td></tr>{{end}}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <div class="section-header">
+                <h2>
+                    Groups
+                    <small><a href="/ui/groups/new">[New]</a></small>
+                </h2>
+                <span class="count-pill">Directory groups</span>
+            </div>
+
+            <div class="table-card">
+                <div class="table-scroll">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>cn</th>
+                            <th>gidNumber</th>
+                            <th>memberUid</th>
+                            <th>member (DN)</th>
+                            <th>actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {{range .Groups}}
+                        <tr>
+                            <td>{{.CN}}</td>
+                            <td class="cell-monospace">{{.GIDNumber}}</td>
+                            <td class="member-list">
+                                {{if .MemberUID}}
+                                {{range $i, $v := .MemberUID}}{{if $i}}<br>{{end}}<a href="/ui/users/edit?uid={{$v}}">{{$v}}</a>{{end}}
+                                {{else}}<em>—</em>{{end}}
+                            </td>
+                            <td class="member-list cell-monospace">
+                                {{if .Member}}
+                                {{range $i, $v := .Member}}
+                                {{if $i}}<br>{{end}}
+                                {{ $uid := uidFromDN $v }}
+                                {{if $uid}}
+                                <a href="/ui/users/edit?uid={{$uid}}">{{$v}}</a>
+                                {{else}}
+                                {{$v}}
+                                {{end}}
+                                {{end}}
+                                {{else}}<em>—</em>{{end}}
+                            </td>
+                            <td class="actions-cell">
+                                <div class="actions-inline">
+                                    <a href="/ui/groups/edit?cn={{.CN}}">Edit</a>
+                                    <span style="color:rgba(75,85,99,0.9);">|</span>
+                                    <form method="post" action="/ui/groups/delete" onsubmit="return confirm('Delete group {{.CN}}?');">
+                                        <input type="hidden" name="csrf_token" value="{{$.CsrfToken}}">
+                                        <input type="hidden" name="cn" value="{{.CN}}">
+                                        <button type="submit" class="btn-link">Delete</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {{end}}
+                        {{if not .Groups}}<tr><td colspan="5"><em>No groups</em></td></tr>{{end}}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <div class="footer-note">
+            jldap UI · All operations are applied directly to your directory.
+        </div>
+    </div>
+</div>
+</body>
+</html>

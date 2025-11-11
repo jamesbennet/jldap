@@ -1,0 +1,6 @@
+* Password hashing (+salt) instead of plaintext userPassword(s) at rest on the disk. Will need API/UI changes to set/change passwords.
+* A self-service (non-admin) “change my password” API/UI endpoint.
+* Implement Modify/Add/Delete via LDAP (write operations) properly.
+* Rewrite the UI in general.
+* Improve performance with large directories / bulk operations.
+* Support more filter types.

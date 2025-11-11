@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>User {{if .IsNew}}Create{{else}}Edit{{end}}</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="stylesheet" href="/static/userForm.css">
+</head>
+<body>
+<div class="page">
+    <div class="page-inner">
+        <header>
+            <div>
+                <span class="product-tag">Directory user</span>
+                <h1>
+                    <span class="highlight">User</span>
+                    <span style="opacity:0.5;">·</span>
+                    <span class="mode">{{if .IsNew}}Create{{else}}Edit{{end}}</span>
+                </h1>
+            </div>
+            <div class="env-pill">
+                <span class="env-dot {{if .IsNew}}env-dot-new{{end}}"></span>
+                <span>{{if .IsNew}}New record{{else}}Existing record{{end}}</span>
+            </div>
+        </header>
+
+        {{if not .IsNew}}
+        <section class="meta-card">
+            <div class="meta-title">Current directory state</div>
+            <div class="meta-row">
+                <strong>uid:</strong>
+                <code>{{.U.UID}}</code>
+            </div>
+            <div class="meta-row">
+                <strong>Admin:</strong>
+                <span>
+                    {{if .IsAdmin}}yes{{else}}no{{end}}
+                    {{if .IsAdmin}}<span class="badge-admin"><span>◆</span><span>Admin</span></span>{{end}}
+                </span>
+            </div>
+            <div class="meta-members">
+                <strong>Member of:</strong><br>
+                {{if .MemberOf}}
+                {{range $i, $g := .MemberOf}}{{if $i}}<br>{{end}}{{$g}}{{end}}
+                {{else}}<em>none</em>{{end}}
+            </div>
+        </section>
+        {{end}}
+
+        <section class="form-card">
+            <form method="post" action="/ui/users/save">
+                <input type="hidden" name="csrf_token" value="{{.CsrfToken}}">
+                <div class="form-grid">
+                    <label class="field">
+                        <span class="field-label">
+                            uid <span class="required">*</span>
+                            <small>Unique ID</small>
+                        </span>
+                        <input
+                                class="field-input"
+                                name="uid"
+                                value="{{.U.UID}}"
+                                {{if not .IsNew}}readonly{{end}}
+                                required>
+                    </label>
+
+                    <label class="field">
+                        <span class="field-label">
+                            cn
+                            <small>Common name</small>
+                        </span>
+                        <input
+                                class="field-input"
+                                name="cn"
+                                value="{{.U.CN}}">
+                    </label>
+
+                    <label class="field">
+                        <span class="field-label">
+                            sn
+                            <small>Surname</small>
+                        </span>
+                        <input
+                                class="field-input"
+                                name="sn"
+                                value="{{.U.SN}}">
+                    </label>
+
+                    <label class="field">
+                        <span class="field-label">
+                            givenName
+                            <small>First name</small>
+                        </span>
+                        <input
+                                class="field-input"
+                                name="givenName"
+                                value="{{.U.GivenName}}">
+                    </label>
+
+                    <label class="field field-wide">
+                        <span class="field-label">
+                            mail
+                            <small>Email address</small>
+                        </span>
+                        <input
+                                class="field-input"
+                                name="mail"
+                                type="email"
+                                value="{{.U.Mail}}">
+                    </label>
+
+                    <label class="field">
+                        <span class="field-label">
+                            uidNumber
+                            <small>Numeric ID</small>
+                        </span>
+                        <input
+                                class="field-input"
+                                name="uidNumber"
+                                value="{{.U.UIDNumber}}">
+                    </label>
+
+                    <label class="field">
+                        <span class="field-label">
+                            gidNumber
+                            <small>Primary group</small>
+                        </span>
+                        <select class="field-select" name="gidNumber">
+                            <option value="">(none)</option>
+                            {{range .Groups}}
+                            <option value="{{.GIDNumber}}" {{if eq .GIDNumber $.U.GIDNumber}}selected{{end}}>
+                                {{.CN}} ({{.GIDNumber}})
+                            </option>
+                            {{end}}
+                        </select>
+                    </label>
+
+                    <label class="field field-wide">
+                        <span class="field-label">
+                            homeDirectory
+                        </span>
+                        <input
+                                class="field-input"
+                                name="homeDirectory"
+                                value="{{.U.HomeDir}}">
+                    </label>
+
+                    <label class="field field-wide">
+                        <span class="field-label">
+                            loginShell
+                        </span>
+                        <input
+                                class="field-input"
+                                name="loginShell"
+                                value="{{.U.LoginShell}}">
+                    </label>
+
+                    <label class="field field-wide">
+                        <span class="field-label">
+                            password
+                            <small>Authentication</small>
+                        </span>
+                        <input
+                                class="field-input"
+                                name="password"
+                                type="password"
+                                value="">
+                        <div class="field-note">Leave blank to keep the current password unchanged.</div>
+                    </label>
+                </div>
+
+                <div class="form-footer">
+                    <div class="footer-left">
+                        <button type="submit" class="btn btn-primary">
+                            {{if .IsNew}}Create{{else}}Save{{end}}
+                        </button>
+                        <a href="/" class="btn btn-ghost">Cancel</a>
+                    </div>
+                    <div class="footer-note">
+                        {{if .IsNew}}New users are written immediately to your directory.{{else}}Saving will update this user in your directory.{{end}}
+                    </div>
+                </div>
+            </form>
+        </section>
+    </div>
+</div>
+</body>
+</html>

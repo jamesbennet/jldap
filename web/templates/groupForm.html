@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Group {{if .IsNew}}Create{{else}}Edit{{end}}</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="stylesheet" href="/static/groupForm.css">
+</head>
+<body>
+<div class="page">
+    <div class="page-inner">
+        <header>
+            <div>
+                <span class="product-tag">Directory group</span>
+                <h1>
+                    <span class="highlight">Group</span>
+                    <span style="opacity:0.5;">·</span>
+                    <span class="mode">{{if .IsNew}}Create{{else}}Edit{{end}}</span>
+                </h1>
+            </div>
+            <div class="env-pill">
+                <span class="env-dot {{if .IsNew}}env-dot-new{{end}}"></span>
+                <span>{{if .IsNew}}New group{{else}}Existing group{{end}}</span>
+            </div>
+        </header>
+
+        <section class="form-card">
+            <form method="post" action="/ui/groups/save">
+                <input type="hidden" name="csrf_token" value="{{.CsrfToken}}">
+                <div class="form-grid">
+                    <label class="field">
+                        <span class="field-label">
+                            cn <span class="required">*</span>
+                            <small>Common name</small>
+                        </span>
+                        <input
+                                class="field-input"
+                                name="cn"
+                                value="{{.G.CN}}"
+                                {{if not .IsNew}}readonly{{end}}
+                                required>
+                    </label>
+
+                    <label class="field">
+                        <span class="field-label">
+                            gidNumber
+                            <small>Numeric ID</small>
+                        </span>
+                        <input
+                                class="field-input"
+                                name="gidNumber"
+                                value="{{.G.GIDNumber}}">
+                    </label>
+                </div>
+
+                <fieldset>
+                    <legend>memberUid</legend>
+                    <div class="fieldset-body">
+                        <label class="field">
+                            <span class="field-label">
+                                Pick users
+                            </span>
+                            <span class="field-note">Use Ctrl/Cmd-click to select multiple users.</span>
+                            <select name="memberUidSel" multiple size="8" class="multi-select">
+                                {{range .Users}}
+                                <option value="{{.UID}}" {{if (contains .UID $.G.MemberUID)}}selected{{end}}>{{.UID}} — {{.CN}}</option>
+                                {{end}}
+                            </select>
+                        </label>
+
+                        <label class="field">
+                            <span class="field-label">
+                                Or enter manually
+                            </span>
+                            <span class="field-note">One per line or comma-separated usernames.</span>
+                            <textarea name="memberUid" rows="4" cols="60">{{.MemberUidJoined}}</textarea>
+                        </label>
+                    </div>
+                </fieldset>
+
+                <fieldset>
+                    <legend>member (DN)</legend>
+                    <div class="fieldset-body">
+                        <label class="field">
+                            <span class="field-label">
+                                Pick users
+                            </span>
+                            <span class="field-note">Select directory entries by DN.</span>
+                            <select name="memberSel" multiple size="8" class="multi-select">
+                                {{range .Users}}
+                                <option value="uid={{.UID}},ou=users,{{$.BaseDN}}" {{if (contains (printf "uid=%s,ou=users,%s" .UID $.BaseDN) $.G.Member)}}selected{{end}}>
+                                uid={{.UID}},ou=users,{{$.BaseDN}} — {{.CN}}
+                                </option>
+                                {{end}}
+                            </select>
+                        </label>
+
+                        <label class="field">
+                            <span class="field-label">
+                                Or enter DNs
+                            </span>
+                            <span class="field-note">One DN per line or comma-separated list.</span>
+                            <textarea name="member" rows="4" cols="60">{{.MemberJoined}}</textarea>
+                        </label>
+                    </div>
+                </fieldset>
+
+                <div class="form-footer">
+                    <div class="footer-left">
+                        <button type="submit" class="btn btn-primary">
+                            {{if .IsNew}}Create{{else}}Save{{end}}
+                        </button>
+                        <a href="/" class="btn btn-ghost">Cancel</a>
+                    </div>
+                    <div class="footer-note">
+                        {{if .IsNew}}New groups are written immediately to your directory.{{else}}Saving will update this group in your directory.{{end}}
+                    </div>
+                </div>
+            </form>
+        </section>
+    </div>
+</div>
+</body>
+</html>

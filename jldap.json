@@ -1,0 +1,78 @@
+{
+  "baseDN": "dc=homelab,dc=lan",
+  "adminUsersCN": "homelab_admins",
+  "users": [
+    {
+      "cn": "James Bennet",
+      "sn": "Bennet",
+      "givenName": "James",
+      "uid": "jbennet",
+      "mail": "james.bennet@homelab.lan",
+      "userPassword": "password1234",
+      "uidNumber": "1001",
+      "gidNumber": "2001",
+      "homeDirectory": "/home/jbennet",
+      "loginShell": "/bin/bash",
+      "objectClass": [
+        "top",
+        "person",
+        "organizationalPerson",
+        "inetOrgPerson",
+        "posixAccount"
+      ]
+    },
+    {
+      "cn": "potato",
+      "sn": "potato",
+      "givenName": "potato",
+      "uid": "potato",
+      "mail": "potato@homelab.lan",
+      "userPassword": "potato",
+      "uidNumber": "1002",
+      "gidNumber": "2002",
+      "homeDirectory": "/home/potato",
+      "loginShell": "/bin/bash",
+      "objectClass": [
+        "top",
+        "person",
+        "organizationalPerson",
+        "inetOrgPerson",
+        "posixAccount"
+      ]
+    }
+  ],
+  "groups": [
+    {
+      "cn": "homelab_admins",
+      "gidNumber": "2001",
+      "member": [
+        "uid=jbennet,ou=users,dc=homelab,dc=lan"
+      ],
+      "memberUid": [
+        "jbennet"
+      ],
+      "objectClass": [
+        "top",
+        "posixGroup",
+        "groupOfNames"
+      ]
+    },
+    {
+      "cn": "homelab_users",
+      "gidNumber": "2002",
+      "member": [
+        "uid=jbennet,ou=users,dc=homelab,dc=lan",
+        "uid=potato,ou=users,dc=homelab,dc=lan"
+      ],
+      "memberUid": [
+        "jbennet",
+        "potato"
+      ],
+      "objectClass": [
+        "top",
+        "posixGroup",
+        "groupOfNames"
+      ]
+    }
+  ]
+}
