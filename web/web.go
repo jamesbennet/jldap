@@ -80,7 +80,7 @@ func uidFromDN(dn string) (string, bool) {
 	if len(parts) != 2 {
 		return "", false
 	}
-	// If the attribute name (left side) is uid (case-insensitive), return the trimmed value and true. Otherwise it’s some other attribute (like cn) ⇒ no UID ⇒ false.
+	// If the attribute name (left side) is uid (case-insensitive), return the trimmed value and true. Otherwise, it’s some other attribute (like cn) ⇒ no UID ⇒ false.
 	if strings.EqualFold(strings.TrimSpace(parts[0]), "uid") {
 		return strings.TrimSpace(parts[1]), true
 	}
@@ -237,7 +237,7 @@ func authenticateBasicLDAP(r *http.Request, store *directory.DirStore) (string, 
 		return "", false
 	}
 	// Iterate over all userpassword values for this entry (LDAP allows multiple).
-	// If any literal value equals the supplied pass, authentication succeeds: If none match, authentication fails..
+	// If any literal value equals the supplied pass, authentication succeeds: If none match, authentication fails.
 	for _, v := range e.Attrs["userpassword"] {
 		if v == pass {
 			return dn, true

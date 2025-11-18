@@ -481,26 +481,6 @@ func TestRequireBasicAuthLDAP_Success(t *testing.T) {
 }
 
 /*
-writeMinimalTemplates creates minimal template files under "web/templates" so
-that StartHTTPAPI can parse them without panicking. This ensures tests don't
-depend on real template files being present in the repo.
-*/
-func writeMinimalTemplates(t *testing.T) {
-	t.Helper()
-	dir := filepath.Join("web", "templates")
-	if err := os.MkdirAll(dir, 0o755); err != nil {
-		t.Fatalf("MkdirAll(%q): %v", dir, err)
-	}
-	files := []string{"ui.html", "userForm.html", "groupForm.html"}
-	for _, name := range files {
-		path := filepath.Join(dir, name)
-		if err := os.WriteFile(path, []byte("{{/* minimal template */}}"), 0o600); err != nil {
-			t.Fatalf("WriteFile(%q): %v", path, err)
-		}
-	}
-}
-
-/*
 TestStartHTTPAPI_MissingConfigFile verifies that StartHTTPAPI:
 
   - Does not panic when LoadFromDisk returns an error (missing file).

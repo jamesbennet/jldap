@@ -59,7 +59,7 @@ func main() {
 	flag.Parse()
 	// TLS configuration starts as nil.
 	var tlsConf *tls.Config
-	// If either: StartTLS is enabled, OR LDAPS address is non-empty, OR the HTTPS API address is non empty, and either cert or key is missing: It’s an invalid configuration ⇒ crash with a fatal log.
+	// If either: StartTLS is enabled, OR LDAPS address is non-empty, OR the HTTPS API address is non-empty, and either cert or key is missing: It’s an invalid configuration ⇒ crash with a fatal log.
 	if (enableStartTLS || ldapsAddr != "" || httpAddr != "") && (certPath == "" || keyPath == "") {
 		log.Fatalf("TLS requested but -tls-cert and -tls-key not both provided")
 	}
@@ -291,12 +291,12 @@ func main() {
 	// Accept connections on LDAPS or block
 	/*
 		If lTLS is non-nil (LDAPS enabled): Run another accept loop in the main goroutine: Accept TLS (encrypted) connections.
-		Wrap each connection in an ldap.Session:
+		Wrap each connection in a ldap.Session:
 			TlsConfig: TLS config (already active).
 			TlsActive: true – indicates this connection is already under TLS.
 		Start Serve() in a goroutine for each connection.
 
-		Else: If there is no LDAPS listener, the main goroutine just blocks forever, as as select {} with no cases never returns, so the program stays running while other goroutines handle LDAP/HTTP and reloads.
+		Else: If there is no LDAPS listener, the main goroutine just blocks forever, as a select {} with no cases never returns, so the program stays running while other goroutines handle LDAP/HTTP and reloads.
 	*/
 	if lTLS != nil {
 		for {

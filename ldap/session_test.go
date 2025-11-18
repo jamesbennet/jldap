@@ -2403,3 +2403,145 @@ func TestEncodeLengthAndValue_RoundTrip(t *testing.T) {
 		}
 	}
 }
+
+func TestHandleCompare_TrueAndFalse(t *testing.T) {
+	conn := &memConn{}
+	d := directory.NewDirectory("dc=example,dc=com")
+
+	userDN := "uid=jdoe,ou=users,dc=example,dc=com"
+	d.Add(&directory.Entry{
+		DN: userDN,
+		Attrs: map[string][]string{
+			"uid": {"jdoe"},
+		},
+		Parent: "ou=users,dc=example,dc=com",
+	})
+	store := &directory.DirStore{}
+	store.Set(d)
+
+	s := &Session{Conn: conn, Store: store}
+
+	buildBody := func(attr, value string) []byte {
+		var ava bytes.Buffer
+		ava.Write(ber.BerWrapString(attr))
+		ava.Write(ber.BerWrapString(value))
+
+		body := bytes.Buffer{}
+		body.Write(ber.BerWrapString(userDN))
+		body.Write(ber.BerWrapSequence(ava.Bytes()))
+		return body.Bytes()
+	}
+
+	// CompareTrue: uid=jdoe
+	{
+		const msgID = 100
+		if err := s.handleCompare(msgID, buildBody("uid", "jdoe")); err != nil {
+			t.Fatalf("handleCompare returned error: %v", err)
+		}
+		packet := conn.writeBuf.Bytes()
+		gotMsgID, opTLV := decodeLDAPMessage(t, packet)
+		if gotMsgID != msgID {
+			t.Fatalf("expected msgID %d, got %d", msgID, gotMsgID)
+		}
+		code, _, _ := decodeLDAPResult(t, opTLV)
+		if code != rcCompareTrue {
+			t.Fatalf("expected rcCompareTrue, got %d", code)
+		}
+	}
+
+	// CompareFalse: uid=other
+	{
+		conn.writeBuf.Reset()
+		const msgID = 101
+		if err := s.handleCompare(msgID, buildBody("uid", "other")); err != nil {
+			t.Fatalf("handleCompare returned error: %v", err)
+		}
+		packet := conn.writeBuf.Bytes()
+		gotMsgID, opTLV := decodeLDAPMessage(t, packet)
+		if gotMsgID != msgID {
+			t.Fatalf("expected msgID %d, got %d", msgID, gotMsgID)
+		}
+		code, _, _ := decodeLDAPResult(t, opTLV)
+		if code != rcCompareFalse {
+			t.Fatalf("expected rcCompareFalse, got %d", code)
+		}
+	}
+}
+
+func TestHandleSearch_FilterEqualityOnUid(t *testing.T) {
+	conn := &memConn{}
+	d := directory.NewDirectory("dc=example,dc=com")
+
+	userDN1 := "uid=jdoe,ou=users,dc=example,dc=com"
+	userDN2 := "uid=other,ou=users,dc=example,dc=com"
+
+	d.Add(&directory.Entry{
+		DN: userDN1,
+		Attrs: map[string][]string{
+			"uid": {"jdoe"},
+		},
+		Parent: "ou=users,dc=example,dc=com",
+	})
+	d.Add(&directory.Entry{
+		DN: userDN2,
+		Attrs: map[string][]string{
+			"uid": {"other"},
+		},
+		Parent: "ou=users,dc=example,dc=com",
+	})
+	store := &directory.DirStore{}
+	store.Set(d)
+	s := &Session{Conn: conn, Store: store}
+
+	// Build equality filter (uid=jdoe) as the server expects (context-specific 3)
+	var eqInner bytes.Buffer
+	eqInner.Write(ber.BerWrapString("uid"))
+	eqInner.Write(ber.BerWrapString("jdoe"))
+	filterTLV := ber.BerWrapTLV(ber.ClassContextSpecific|ber.PcConstructed|3, eqInner.Bytes())
+
+	body := bytes.Buffer{}
+	body.Write(ber.BerWrapString(d.BaseDN)) // base
+	body.Write(ber.BerWrapEnum(2))          // scope = wholeSubtree
+	body.Write(ber.BerWrapEnum(0))          // deref
+	body.Write(ber.BerWrapInteger(0))       // sizeLimit
+	body.Write(ber.BerWrapInteger(0))       // timeLimit
+	body.Write(buildBoolTLV(false))         // typesOnly=false
+	body.Write(filterTLV)                   // filter (uid=jdoe)
+	body.Write(ber.BerWrapSequence(nil))    // attrs: empty sequence -> "all"
+
+	const msgID = 200
+	if err := s.handleSearch(msgID, body.Bytes()); err != nil {
+		t.Fatalf("handleSearch returned error: %v", err)
+	}
+
+	r := bytes.NewReader(conn.writeBuf.Bytes())
+
+	// Expect exactly one SearchResultEntry with DN=userDN1, then SearchResultDone
+	mid1, op1 := decodeLDAPMessageFromReader(t, r)
+	if mid1 != msgID || op1.Tag&0x1F != appSearchResEntry {
+		t.Fatalf("expected SearchResultEntry, got mid %d tag 0x%X", mid1, op1.Tag&0x1F)
+	}
+	rr := bytes.NewReader(op1.Value)
+	dnTLV, err := ber.BerReadTLV(rr)
+	if err != nil {
+		t.Fatalf("failed reading DN: %v", err)
+	}
+	if string(dnTLV.Value) != userDN1 {
+		t.Fatalf("expected DN %q, got %q", userDN1, string(dnTLV.Value))
+	}
+
+	// Done
+	mid2, op2 := decodeLDAPMessageFromReader(t, r)
+	if mid2 != msgID || op2.Tag&0x1F != appSearchDone {
+		t.Fatalf("expected SearchResultDone, got mid %d tag 0x%X", mid2, op2.Tag&0x1F)
+	}
+	code, _, diag := decodeLDAPResult(t, op2)
+	if code != rcSuccess || diag != "" {
+		t.Fatalf("expected success, got code %d diag %q", code, diag)
+	}
+
+	// And nothing else
+	if r.Len() != 0 {
+		t.Fatalf("expected only one entry + done, but extra bytes remain (%d)", r.Len())
+	}
+}
