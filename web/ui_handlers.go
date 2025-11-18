@@ -267,7 +267,7 @@ func uiHandlerFunc(store *directory.DirStore, cfg *json_config.ConfigStore, uiTm
 }
 
 /*
-rootHandler takes a “inner” UI handler function and wraps it in a handler suitable for the root (/) path.
+rootHandler takes an “inner” UI handler function and wraps it in a handler suitable for the root (/) path.
 Only responds to exact /. Any other path yields 404.
 Only allows GET; all other methods get 405.
 Delegates to the provided uiHandler if checks pass.
@@ -467,7 +467,7 @@ func uiUsersSaveHandler(store *directory.DirStore, cfg *json_config.ConfigStore)
 			return
 		}
 		// Reloads the in-memory directory from the JSON config file (so LDAP view matches changes).
-		// If load succeeds (err == nil), then store.Set(d) to replace directory, else log the err.
+		// If load succeeds (err == nil), then store.Set(d) to replace directory, else log the error.
 		if d, err := json_config.LoadDirectoryFromJSON(cfg.Path); err != nil {
 			log.Printf("%+v", err)
 		} else {

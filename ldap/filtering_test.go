@@ -543,9 +543,8 @@ func TestParseFilterSubstringBadChoiceClass(t *testing.T) {
 }
 
 /*
-TestParseFilterSubstringUnknownChoice verifies that parseFilter
-detects and errors when a substring choice has an unknown context-
-specific tag number (not 0, 1, or 2).
+TestParseFilterSubstringUnknownChoice verifies that parseFilter detects and errors when a substring choice has an
+unknown context-specific tag number (not 0, 1, or 2).
 */
 func TestParseFilterSubstringUnknownChoice(t *testing.T) {
 	attrVal := []byte("cn")

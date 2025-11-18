@@ -335,7 +335,7 @@ func parseFilter(b []byte) (filter, error) {
 		return filterPresent{Attr: string(tlv.Value)}, nil
 	}
 	// Fallback – match everything - If none of the recognized filter types matched, return filterAny{} which matches any entry. Acts as a default “no restriction” filter.
-	// NOTE: I did this for compatibility, but we may want to refactor this in future, as if a client thinks it is sending a restrictive filter but mis-encodes it, we may return more entries than expected instead of failing.
+	// NOTE: I did this for compatibility, but we may want to refactor this in the future, as if a client thinks it is sending a restrictive filter but mis-encodes it, we may return more entries than expected instead of failing.
 	return filterAny{}, nil
 }
 

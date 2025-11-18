@@ -247,7 +247,7 @@ func (s *Session) handleBind(msgID int, body []byte) error {
 		log.Printf("bad auth choice - only simple bind supported: %+v", err)
 		return s.writeBindResult(msgID, rcAuthMethodNotSupported, "", "bad auth choice - only simple bind supported")
 	}
-	// If the low 5 bits (tag number) is 0 and it’s primitive, that’s “simple” bind.
+	// If the low 5 bits (tag number) is 0, and it’s primitive, that’s “simple” bind.
 	if (auth.Tag&0x1F) == 0 && (auth.Tag&0x20) == ber.PcPrimitive {
 		// auth.Value contains the password bytes; convert to string.
 		pass := string(auth.Value)
@@ -800,7 +800,7 @@ func (s *Session) handleCompare(msgID int, body []byte) error {
 		}
 	}
 	code := rcCompareFalse
-	// If match found, result code is rcCompareTrue. Otherwise rcCompareFalse.
+	// If match found, result code is rcCompareTrue. Otherwise, rcCompareFalse.
 	if match {
 		code = rcCompareTrue
 	}

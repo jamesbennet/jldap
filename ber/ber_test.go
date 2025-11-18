@@ -86,7 +86,7 @@ TLV-encoded INTEGER:
 It covers:
 - 0, 5 as simple single-byte values.
 - 128 which requires a leading 0x00 in the value.
-- 300 (0x012C) as a multi-byte big-endian value.
+- 300 (0x012C) as a multibyte big-endian value.
 */
 func TestBerWrapInteger_Encoding(t *testing.T) {
 	tests := []struct {
@@ -822,7 +822,7 @@ func TestBerWrapCtx_AllowsTagsInRange(t *testing.T) {
 }
 
 // TestBerWrapCtx_PanicsOnTagTooLarge ensures that BerWrapCtx rejects
-// invalid context-specific tag numbers ≥ 31 (which require multi-byte tag
+// invalid context-specific tag numbers ≥ 31 (which require multibyte tag
 // encoding in BER) by panicking, preventing silent generation of invalid
 // tag bytes.
 func TestBerWrapCtx_PanicsOnTagTooLarge(t *testing.T) {

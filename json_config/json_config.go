@@ -38,7 +38,7 @@ func (c *ConfigStore) LoadFromDisk() error {
 	// os.Stat retrieves file info (size, mod time, etc.).
 	fi, err := os.Stat(c.Path)
 	if err != nil {
-		// If there’s an error, log. No need to return, it fails, fi will be nil and we handle that later.
+		// If there’s an error, log. No need to return, it fails, fi will be nil, and we handle that later.
 		log.Printf("%+v", err)
 	}
 	// Acquire the write lock on the ConfigStore’s mutex (Mu is a sync.RWMutex).

@@ -85,31 +85,31 @@ Compared to _lldap_ and _glauth_, in the Homelab context:
 *  ✘ No password hashing
 *  ✘ No ACLs
 *  ✘ No multi-domain, no token issuing
-*  ✘ No multi-factor, no OIDC, no web-based auth
+*  ✘ No multifactor, no OIDC, no web-based auth
 *  ✘ No write operations via LDAP (read-only LDAP)
 *  ✘ Not suitable for PAM/NSS
 
-| Feature                                          | JLDAP                               | LLDAP                | GLAuth                |
-|--------------------------------------------------|-------------------------------------|----------------------|-----------------------|
-| Full LDAP v3 BER encoder/decoder                 | **Yes (handwritten)**               | Yes                  | **No (partial)**      |
-| Bind (simple)                                    | Yes                                 | Yes                  | Yes                   |
-| SASL PLAIN                                       | **Yes**                             | Yes                  | No                    |
-| Anonymous bind                                   | Yes                                 | Yes                  | Yes                   |
-| Search filters (AND/OR/NOT, substring, presence) | **Yes**                             | Yes                  | **No (very limited)** |
-| Subtree search                                   | **Yes**                             | Yes                  | Partial               |
-| Compare op                                       | **Yes**                             | Yes                  | No                    |
-| Root DSE                                         | **Yes**                             | Yes                  | No                    |
-| cn=subschema                                     | **Yes**                             | Yes                  | No                    |
-| StartTLS                                         | **Yes**                             | Yes                  | **No**                |
-| LDAPS                                            | **Yes**                             | Yes                  | **No (needs proxy)**  |
+| Feature                                          | JLDAP                                     | LLDAP                | GLAuth                |
+|--------------------------------------------------|-------------------------------------------|----------------------|-----------------------|
+| Full LDAP v3 BER encoder/decoder                 | **Yes (handwritten)**                     | Yes                  | **No (partial)**      |
+| Bind (simple)                                    | Yes                                       | Yes                  | Yes                   |
+| SASL PLAIN                                       | **Yes**                                   | Yes                  | No                    |
+| Anonymous bind                                   | Yes                                       | Yes                  | Yes                   |
+| Search filters (AND/OR/NOT, substring, presence) | **Yes**                                   | Yes                  | **No (very limited)** |
+| Subtree search                                   | **Yes**                                   | Yes                  | Partial               |
+| Compare op                                       | **Yes**                                   | Yes                  | No                    |
+| Root DSE                                         | **Yes**                                   | Yes                  | No                    |
+| cn=subschema                                     | **Yes**                                   | Yes                  | No                    |
+| StartTLS                                         | **Yes**                                   | Yes                  | **No**                |
+| LDAPS                                            | **Yes**                                   | Yes                  | **No (needs proxy)**  |
 | Modify/Add/Delete                                | **Ish** (_read-only LDAP but has API/UI_) | Yes                  | No                    |
-| memberOf virtual attribute                       | **Yes**                             | Yes                  | No                    |
-| External DB                                      | **No**                              | **Yes (PostgreSQL)** | No                    |
-| Config format                                    | **JSON**                            | YAML                 | TOML                  |
-| Hot reload                                       | **Yes (SIGHUP + 10min poll)**       | No                   | Limited               |
-| Persist changes                                  | **Yes (writes JSON)**               | Yes                  | Yes                   |
-| Password hashing                                 | **No**                              | Yes                  | Yes                   |
-| Multi-domain                                     | No                                  | **Yes**              | No                    |
+| memberOf virtual attribute                       | **Yes**                                   | Yes                  | No                    |
+| External DB                                      | **No**                                    | **Yes (PostgreSQL)** | No                    |
+| Config format                                    | **JSON**                                  | YAML                 | TOML                  |
+| Hot reload                                       | **Yes (SIGHUP + 10min poll)**             | No                   | Limited               |
+| Persist changes                                  | **Yes (writes JSON)**                     | Yes                  | Yes                   |
+| Password hashing                                 | **No**                                    | Yes                  | Yes                   |
+| Multi-domain                                     | No                                        | **Yes**              | No                    |
 
 For homelab apps like Gitea, Jenkins, Proxmox, DokuWiki, Keycloak, etc... LLDAP is (_for me_), the way to go.
 

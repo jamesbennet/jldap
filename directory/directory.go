@@ -290,7 +290,7 @@ type DirStore struct{ val atomic.Value }
 
 /*
 The Get function retrieves the current value stored inside the DirStore's atomic.Value and returns it as a *Directory.
-It givess you the current directory snapshot in a lock-free, thread-safe way.
+It gives you the current directory snapshot in a lock-free, thread-safe way.
 */
 func (s *DirStore) Get() *Directory {
 	// atomic.Value.Load() returns the current stored value - The return type is interface{}, so it could be anything (or nil).
